@@ -1,7 +1,11 @@
 package mapreduce
 
 import (
-	"hash/fnv"
+	"hash/fnv"; 
+	"io/ioutil";
+	"log";
+	"encoding/json";
+	"os";
 )
 
 func doMap(
@@ -53,6 +57,39 @@ func doMap(
 	//
 	// Your code here (Part I).
 	//
+
+	data, err := ioutil.ReadFile(inFile)
+	if err != nil {
+		log.Fatalf("doMap: could not read file %s: %v", inFile, err)
+	}
+	content := string(data)
+	log.Printf("doMap: processing file %s LEN=[%d] for map task %d", inFile, len(content), mapTask)
+	kvs := mapF(inFile, content)
+	log.Printf("doMap: generated [%d] kv pairs", len(kvs))
+
+	kvbuckets := make([][]KeyValue, nReduce)
+	for _, kv := range kvs {
+		k := kv.Key
+		// v := kv.Value
+		r := ihash(k) % nReduce
+		kvbuckets[r] = append(kvbuckets[r], kv)
+	}
+	for r, bucket := range kvbuckets {
+		log.Printf("doMap: bucket%d got %d kvs", r, len(bucket))
+		output_name := reduceName(jobName, mapTask, r)
+		file, err := os.Create(output_name)
+		if err != nil {
+			log.Fatalf("doMap: could not create %s", output_name)
+		}
+		enc := json.NewEncoder(file)
+		for _, kv := range bucket {
+			err := enc.Encode(&kv)
+			if err != nil {
+				log.Fatalf("doMap: could not encode kv %v to file %s: %v", kv, output_name, err)
+			}
+		}
+		log.Printf("doMap: wrote [%d] kvs to %s", len(bucket), output_name)
+	}
 }
 
 func ihash(s string) int {
