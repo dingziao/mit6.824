@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"io"
 	"bufio"
 	"log"
 	"os"
@@ -18,6 +19,22 @@ const (
 	nMap    = 20
 	nReduce = 10
 )
+
+// 自定义 Writer，用来拦截 log.Println 的输出
+type filteredWriter struct {
+	underlying io.Writer
+}
+
+func (fw filteredWriter) Write(p []byte) (int, error) {
+	s := string(p)
+	if strings.Contains(s, "has wrong number of ins: 1") {
+		// 拦截，不输出
+		return len(p), nil
+	}
+	// 正常输出
+	return fw.underlying.Write(p)
+}
+
 
 // Create input file with N numbers
 // Check if we have N numbers in output file
@@ -157,6 +174,8 @@ func TestSequentialMany(t *testing.T) {
 	check(t, mr.files)
 	checkWorker(t, mr.stats)
 	cleanup(mr)
+	debug("---\n")
+	log.SetOutput(filteredWriter{underlying: os.Stdout})
 }
 
 func TestParallelBasic(t *testing.T) {

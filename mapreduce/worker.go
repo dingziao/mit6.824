@@ -137,6 +137,7 @@ func RunWorker(MasterAddress string, me string,
 	}
 	wk.l = l
 	wk.register(MasterAddress)
+	debug("wk register %s", MasterAddress)
 
 	// DON'T MODIFY CODE BELOW
 	for {

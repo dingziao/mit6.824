@@ -65,7 +65,7 @@ func doReduce(
 		for dec.More() {
 			err := dec.Decode(&kv)
 			if err != nil {
-				log.Printf("doReduce: no more kv")
+				// debug("doReduce: no more kv")
 			}else{
 				k := kv.Key
 				v := kv.Value
@@ -83,6 +83,6 @@ func doReduce(
 		enc.Encode(KeyValue{k, reduceF(k, vl)})
 	}
 	file.Close()
-	log.Printf("doReduce: finish reduce")
+	// debug("doReduce: finish reduce")
 
 }

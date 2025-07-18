@@ -63,9 +63,9 @@ func doMap(
 		log.Fatalf("doMap: could not read file %s: %v", inFile, err)
 	}
 	content := string(data)
-	log.Printf("doMap: processing file %s LEN=[%d] for map task %d", inFile, len(content), mapTask)
+	// debug("doMap: processing file %s LEN=[%d] for map task %d", inFile, len(content), mapTask)
 	kvs := mapF(inFile, content)
-	log.Printf("doMap: generated [%d] kv pairs", len(kvs))
+	// debug("doMap: generated [%d] kv pairs", len(kvs))
 
 	kvbuckets := make([][]KeyValue, nReduce)
 	for _, kv := range kvs {
@@ -75,7 +75,7 @@ func doMap(
 		kvbuckets[r] = append(kvbuckets[r], kv)
 	}
 	for r, bucket := range kvbuckets {
-		log.Printf("doMap: bucket%d got %d kvs", r, len(bucket))
+		// debug("doMap: bucket%d got %d kvs", r, len(bucket))
 		output_name := reduceName(jobName, mapTask, r)
 		file, err := os.Create(output_name)
 		if err != nil {
@@ -88,7 +88,7 @@ func doMap(
 				log.Fatalf("doMap: could not encode kv %v to file %s: %v", kv, output_name, err)
 			}
 		}
-		log.Printf("doMap: wrote [%d] kvs to %s", len(bucket), output_name)
+		// debug("doMap: wrote [%d] kvs to %s", len(bucket), output_name)
 	}
 }
 

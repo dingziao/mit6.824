@@ -83,7 +83,7 @@ func Sequential(jobName string, files []string, nreduce int,
 // and newly registered workers to channel ch. schedule()
 // reads ch to learn about workers.
 func (mr *Master) forwardRegistrations(ch chan string) {
-	i := 0
+	i := 0 // working
 	for {
 		mr.Lock()
 		if len(mr.workers) > i {
